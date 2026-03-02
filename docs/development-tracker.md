@@ -1,0 +1,147 @@
+# Development Tracker（MVP v0.1）
+
+本文件用于区分三类事项：
+- 已完成（当前仓库已落地）
+- 本次要实现（进入 v0.1 开发）
+- 后续开发（明确不在 v0.1）
+
+更新时间：2026-03-02
+
+## 1) 已完成（架构与规范文档）
+
+- [x] 项目总览与三方职责说明（Buyer / Seller / Platform）
+- [x] MVP 架构基线文档（状态机、幂等、错误码、token、签名、超时分层）
+- [x] 平台 API v0.1 文档（目录、token、请求事件 ACK、心跳、metrics）
+- [x] 集成手册（买家流程、卖家流程、平台目录分发流程）
+- [x] 目录手工导入模板（单条 JSON + 批量 NDJSON）
+- [x] 数据采集方案文档（宣传/运营/优化）
+- [x] ACK 机制文档化（卖家先 ACK，再执行，再邮件回包）
+- [x] seller heartbeat 文档化（可用性 `healthy/degraded/offline`）
+- [x] 决策记录：MVP 不做检索能力开发，仅遍历 + 分类过滤
+- [x] 安全模型补全（Token 传输安全、API Key 生命周期、公钥轮换协议）
+- [x] 监控告警最小方案（healthz、告警规则、告警通道）
+- [x] 最小争议通道（DISPUTED 状态流程与证据留存）
+- [x] 卖家信息变更流程（可变更字段、变更方式、公钥轮换联动）
+- [x] MVP 免费试用声明（pricing_mode=reference_only）
+- [x] 目标用户画像与 FAQ
+- [x] 榜单策略增强（同类对比、徽章机制、平台验证任务预留）
+- [x] 测试策略（单元/集成/负载/混沌测试清单）
+- [x] Schema 演进与版本升级策略
+- [x] 外部依赖风险清单
+- [x] README 精简为接口清单表
+- [x] 超时与 Token 参数校准（ack_deadline_s=120, token_ttl_seconds=900）
+
+说明：当前仍是“文档设计阶段”，尚无服务端/买家端/卖家端代码实现。
+
+## 2) 本次要实现（进入 v0.1 开发）
+
+## 2.1 服务端（Platform Control Plane）
+- [ ] API Key 鉴权中间件（buyer/seller 分主体 key）
+- [ ] 买家/卖家主体注册与 API Key 签发流程
+- [ ] `GET /v1/catalog/subagents`（目录查询，支持 `status/availability_status/capability`）
+- [ ] `POST /v1/tokens/task`（签发 task token）
+- [ ] `POST /v1/tokens/introspect`（v0.1 必做，卖家统一在线校验）
+- [ ] `POST /v1/requests/{request_id}/ack`（卖家 ACK 事件）
+- [ ] `GET /v1/requests/{request_id}/events`（买家事件轮询）
+- [ ] `POST /v1/sellers/{seller_id}/heartbeat`（卖家心跳）
+- [ ] `POST /v1/metrics/events`（事件上报）
+- [ ] `GET /v1/metrics/summary`（聚合查询）
+- [ ] 目录导入流程（表单提交 + CLI 审核导入 + 按需即时导入 + 版本记录）
+- [ ] 服务端存储落地 PostgreSQL（schema + migration）
+
+## 2.2 买家端（Buyer Controller Skill）
+- [ ] 目录遍历/分类过滤选择 seller
+- [ ] 任务合约生成（含 `request_id`）
+- [ ] 申请 token 并写入合约
+- [ ] 邮箱 MCP 发任务邮件
+- [ ] ACK 事件轮询与 `ack_deadline` 超时处理
+- [ ] 邮箱结果轮询
+- [ ] 验签 + schema 校验 + 最小验收
+- [ ] 状态机与幂等状态落库
+- [ ] 买家指标上报
+
+## 2.3 卖家端（Seller Template）
+- [ ] 邮箱 MCP 收件与合约解析
+- [ ] token 校验（claims + 过期 + 受众）
+- [ ] 护栏检查（预算/超时/任务类型）
+- [ ] `request_id` 幂等去重与结果回放
+- [ ] 先发 ACK 事件，再执行任务
+- [ ] 执行器接口 + 至少 1 个示例执行器
+- [ ] 结果包签名与同线程回信
+- [ ] 卖家心跳周期上报
+- [ ] 卖家指标上报
+
+## 2.4 E2E 验收（必须跑通）
+- [ ] 用例 A：成功
+- [ ] 用例 B：超时
+- [ ] 用例 C：token 过期
+- [ ] 用例 D：输出不合规
+
+## 2.5 测试策略
+- **单元测试**：
+  - [ ] 合约 schema 校验（必填字段、类型、版本兼容）
+  - [ ] token claims 校验（aud/sub/request_id/subagent_id/exp）
+  - [ ] Ed25519 签名生成与验签
+  - [ ] 状态机迁移逻辑（合法迁移路径与非法迁移拒绝）
+  - [ ] 错误码映射与 retryable 标记
+- **集成测试**：
+  - [ ] 邮箱 MCP 收发（发送任务邮件 -> 同线程回信 -> 按 request_id 拉取）
+  - [ ] PostgreSQL CRUD（catalog_items、request_events、metrics_events）
+  - [ ] introspect 端到端（签发 token -> introspect 校验 -> 过期后校验失败）
+  - [ ] 心跳与可用性状态联动（heartbeat -> healthy/degraded/offline 判定）
+- **负载测试（后续）**：
+  - [ ] 卖家心跳并发（模拟 N 个卖家同时心跳）
+  - [ ] introspect 并发（验证 P99 < 200ms 目标）
+  - [ ] 目录查询并发
+- **混沌测试（后续）**：
+  - [ ] 邮件延迟模拟（验证超时分层与状态迁移）
+  - [ ] 平台重启（验证状态持久化与恢复）
+  - [ ] 卖家断连（验证 degraded/offline 判定时效性）
+
+## 3) 后续开发（不在 v0.1）
+
+- [ ] 检索增强（联想检索、模糊搜索、领域策略、搜索排序）
+- [ ] 目录快照/增量接口（`/snapshot`、`/changes`）
+- [ ] 实时事件推送（SSE/WebSocket），替代轮询
+- [ ] 请求进度事件上报（`POST /v1/requests/{request_id}/events`，`RUNNING/PROGRESS`）
+- [ ] 积分策略（基于调用量、成功率、稳定性的积分与激励规则）
+- [ ] 完整争议仲裁流程（`DISPUTED` 全流程）
+- [ ] 复杂信誉分与多目标排序
+- [ ] 结算与分账系统
+- [ ] 高级风控（异常流量/滥用检测）
+
+## 4) 冻结决策（当前版本）
+
+- [x] 传输通道：邮箱 MCP（仅任务/结果正文）
+- [x] 平台定位：控制面，不转发任务正文
+- [x] 目录方式：手工导入 + 查询 API
+- [x] ACK 机制：卖家确认执行后先走服务端 ACK
+- [x] 心跳机制：卖家周期心跳，目录暴露可用性状态
+- [x] 检索策略：MVP 不实现搜索引擎能力
+- [x] token 校验模式：卖家统一走在线 introspect
+- [x] 请求事件范围：v0.1 仅实现 `ACKED`
+- [x] 目录导入策略：按需即时导入
+- [x] 服务端存储：PostgreSQL
+- [x] 数据采集范围：以聚合指标和元数据为主，默认不采集正文
+- [x] seller 不维护 subagent 列表，平台导入时建立 seller-subagent 关联
+- [x] API 鉴权方式：API Key
+- [x] 目录提交流程：表单提交 + CLI 审核导入
+- [x] 主体接入方式：买卖双方先注册，再发 key
+- [x] 定价模式：免费试用（pricing_mode=reference_only, settlement_enabled=false）
+- [x] 邮件投递预算：email_delivery_budget_s=60
+- [x] introspect 性能目标：P99 < 200ms，缓存 TTL=30s
+
+## 5) 待你确认（参数冻结）
+
+参数建议见：
+- `docs/defaults-v0.1.md`
+
+确认结果（已冻结，可开工）：
+- [x] `ack_deadline_s=120`
+- [x] `token_ttl_seconds=900`
+- [x] `soft_timeout_s=90 / hard_timeout_s=300`
+- [x] `max_retry_attempts=2` 与 `retry_backoff=exponential+jitter`
+- [x] `heartbeat_interval_s=30 / degraded_threshold_s=90 / offline_threshold_s=180`
+- [x] `result_signature_algorithm=Ed25519`
+- [x] `catalog_default_availability_filter=healthy`
+- [x] `ranking_min_samples=30`
