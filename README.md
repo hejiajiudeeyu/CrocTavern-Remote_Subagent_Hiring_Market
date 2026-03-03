@@ -8,6 +8,10 @@
 
 **核心思想**：市场交易对象不是本地可安装的 skills，而是 **Remote Subagent** —— 已部署在卖家环境中、通过标准化合约接口远程调用的 AI 能力单元。买家只处理输入输出，执行始终发生在卖家侧环境。
 
+**在线演示**：
+- [Ecosystem 介绍](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/ecosystem.html)
+- [Playground 演示](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/playground.html)
+
 ## 什么是 Remote Subagent？(Core Concept)
 
 **Remote Subagent** 是本项目定义的核心交易对象：一个已部署在卖家环境中、通过结构化合约接口远程调用的 AI 能力单元。
