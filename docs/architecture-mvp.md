@@ -163,6 +163,45 @@
   - `Content-Type: application/json` 附件或正文块
   - 明确 `schema_type=task_contract` 或 `schema_type=result_package`
 
+## 4.5 能力声明模板（Capability Templates）
+
+### 目的
+解决买卖双方信息不对称问题：买家在选择 subagent 后，需要明确**应提供哪些输入**以及**将获得什么格式的输出**。模板机制通过结构化的 schema 和示例实现渐进式披露。
+
+### 模板目录结构
+每个已注册 subagent 在仓库中维护一组模板文件：
+
+```
+docs/templates/subagents/{subagent_id}/
+├── input.schema.json      # 输入 JSON Schema，定义 task.input 字段
+├── output.schema.json     # 输出 JSON Schema，定义 task.output_schema
+├── example-contract.json  # 完整合约示例
+├── example-result.json    # 完整结果包示例
+└── README.md              # 能力说明、标签集、约束、快速开始
+```
+
+### 目录关联
+目录条目新增 `template_ref` 字段，指向该 subagent 的模板目录路径：
+```json
+{
+  "subagent_id": "foxlab.text.classifier.v1",
+  "template_ref": "docs/templates/subagents/foxlab.text.classifier.v1/",
+  ...
+}
+```
+
+### 渐进式披露流程
+1. **浏览目录**：买家查询 `/v1/catalog/subagents`，获得概要信息（description、capabilities、pricing_hint 等）。
+2. **选择 subagent**：买家确定目标 subagent 后，通过 `template_ref` 获取模板文件。
+3. **构造合约**：买家参照 `input.schema.json` 填写 `task.input`，用 `output.schema.json` 设定 `task.output_schema`。
+4. **参考示例**：`example-contract.json` 和 `example-result.json` 提供端到端的请求-响应样本。
+
+### 模板维护规范
+- 模板文件由卖家维护，通过 PR 提交更新。
+- Schema 变更遵循合约版本策略（§3.2）：仅允许向后兼容新增字段。
+- 平台在合并模板 PR 后自动更新目录的 `updated_at` 时间戳。
+- MVP 阶段模板存储在 Git 仓库中，后续可迁移至独立存储服务。
+
 ## 5. Token 与签名模型
 
 ## 5.1 Task Token 必备 claims

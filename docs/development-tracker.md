@@ -30,6 +30,11 @@
 - [x] 外部依赖风险清单
 - [x] README 精简为接口清单表
 - [x] 超时与 Token 参数校准（ack_deadline_s=120, token_ttl_seconds=900）
+- [x] 能力声明模板机制（Capability Templates）：解决买卖双方输入输出信息不对称
+- [x] foxlab.text.classifier.v1 模板文件（input/output schema、示例合约/结果、README）
+- [x] owlworks.data.extractor.v1 模板文件（input/output schema、示例合约/结果、README）
+- [x] 目录条目新增 `template_ref` 字段，关联能力声明模板目录
+- [x] 集成手册补充模板拉取流程（渐进式披露）与卖家模板维护规范
 
 说明：当前仍是“文档设计阶段”，尚无服务端/买家端/卖家端代码实现。
 
@@ -130,6 +135,7 @@
 - [x] 定价模式：免费试用（pricing_mode=reference_only, settlement_enabled=false）
 - [x] 邮件投递预算：email_delivery_budget_s=60
 - [x] introspect 性能目标：P99 < 200ms，缓存 TTL=30s
+- [x] 能力声明模板存储：Git 仓库 `docs/templates/subagents/{subagent_id}/`，后续可迁移至独立存储
 
 ## 5) 待你确认（参数冻结）
 

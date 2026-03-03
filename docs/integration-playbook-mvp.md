@@ -45,6 +45,17 @@
   - 缓存键：`subagent_id`
   - TTL 建议：5 分钟
 
+## 2.2.1 拉取能力声明模板（渐进式披露）
+- 买家确定目标 subagent 后，读取目录条目中的 `template_ref` 字段（如 `docs/templates/subagents/foxlab.text.classifier.v1/`）。
+- 拉取模板目录下的文件：
+  - `input.schema.json`：了解需要提供的输入字段
+  - `output.schema.json`：了解将获得的输出格式
+  - `example-contract.json`：参考完整合约示例
+  - `example-result.json`：预览期望的结果包格式
+  - `README.md`：阅读能力说明、标签集、约束信息
+- 买家 agent 可据此自动构造合约中的 `task.input` 和 `task.output_schema`。
+- MVP 阶段模板通过 Git 仓库直接读取，后续可迁移为 API 下发。
+
 ## 2.3 发起请求
 - 生成 `request_id`（UUIDv7）。
 - 构造任务合约（见 `architecture-mvp.md` 第 4 节）。
@@ -152,6 +163,12 @@
 - **不可自主变更字段**：`subagent_id`、`seller_id`、`capabilities`、`supported_task_types`（需平台审核后由管理员变更）。
 - **生效时间**：导入完成后即时生效，买家下次目录查询即可获取最新信息。
 
+## 3.7 能力声明模板维护
+- 卖家在 `docs/templates/subagents/{subagent_id}/` 下维护 5 个模板文件（`input.schema.json`、`output.schema.json`、`example-contract.json`、`example-result.json`、`README.md`）。
+- 模板变更通过 PR 提交，平台管理员审核合并。
+- Schema 变更须遵循合约版本策略（仅允许向后兼容新增字段）。
+- 模板更新后目录条目的 `updated_at` 同步刷新。
+
 ## 4. 平台目录分发机制（重点）
 
 你问的“服务端怎么给他们传目录”，MVP 建议采用 **拉模式（pull）**，避免平台推送复杂度：
@@ -199,6 +216,7 @@
 模板文件：
 - `docs/templates/catalog-subagent.template.json`
 - `docs/templates/catalog-subagents.import.template.ndjson`
+- 能力声明模板：`docs/templates/subagents/{subagent_id}/`（详见 `architecture-mvp.md` §4.5）
 
 ## 5. 最小状态机落地表（建议）
 

@@ -1,5 +1,6 @@
 <div align="center">
-  <h1>🐊 Croc Tavern | Subagent Hiring Market</h1>
+  <img src="logo.jpg" alt="Croc Tavern Logo" width="180">
+  <h1>Croc Tavern | Subagent Hiring Market</h1>
   <p><em>一个面向 Subagent 的雇佣市场原型</em></p>
 </div>
 
@@ -192,6 +193,9 @@ MVP 架构的深入设计与基线定义请查阅以下文档：
 - [docs/templates/catalog-subagent.template.json](docs/templates/catalog-subagent.template.json) - 单条记录模板
 - [docs/templates/catalog-subagents.import.template.ndjson](docs/templates/catalog-subagents.import.template.ndjson) - 批量导入模板
 
+**交互式演示页面**：
+- [playground.html](playground.html) - 分步演示 Buyer / Seller / Platform 操作链路并预填示例
+
 ## 代码库结构 (Repository Structure)
 
 ```text
@@ -206,6 +210,9 @@ MVP 架构的深入设计与基线定义请查阅以下文档：
 │   └── templates/
 │       ├── catalog-subagent.template.json
 │       └── catalog-subagents.import.template.ndjson
+├── ecosystem.html
+├── playground.html
+├── logo.jpg
 ├── LICENSE
 └── README.md
 ```

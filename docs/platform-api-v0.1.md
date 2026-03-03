@@ -88,7 +88,8 @@ Query 参数：
         "sample_size_7d": 340,
         "updated_at": "2026-03-02T12:00:00Z"
       },
-      "seller_public_key": "-----BEGIN PUBLIC KEY-----..."
+      "seller_public_key": "-----BEGIN PUBLIC KEY-----...",
+      "template_ref": "docs/templates/subagents/foxlab.text.classifier.v1/"
     }
   ],
   "next_page_token": null
@@ -126,6 +127,7 @@ Query 参数：
 - `eta_hint.sample_size_7d`（可选）
 - `eta_hint.updated_at`（可选）
 - `seller_public_key`（必填）
+- `template_ref`（可选，指向能力声明模板目录路径，如 `docs/templates/subagents/{subagent_id}/`）
 - `updated_at`（可选）
 
 201 响应示例：
@@ -372,6 +374,10 @@ Path 参数：
 MVP 目录注册采用手工导入，模板文件见：
 - `docs/templates/catalog-subagent.template.json`（单条模板）
 - `docs/templates/catalog-subagents.import.template.ndjson`（批量模板）
+
+能力声明模板（详见 `architecture-mvp.md` §4.5）：
+- 每个 subagent 在 `docs/templates/subagents/{subagent_id}/` 下维护 `input.schema.json`、`output.schema.json`、`example-contract.json`、`example-result.json`、`README.md`。
+- 目录条目通过 `template_ref` 字段指向对应目录，买家选定 subagent 后可拉取模板了解输入输出要求。
 
 建议导入流程：
 1. seller 先完成主体注册（获取 `seller_id` 和 API Key）。
