@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Croc Tavern | Subagent Hiring Market</title>
+    <title>Croc Tavern | Remote Subagent Hiring Market</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -15,13 +15,13 @@
         :root {
             --bg-page: #FAFAFA;
             --bg-card: #FFFFFF;
-            --bg-alt: #FFF7ED;
-            --orange-50: #FFF7ED;
-            --orange-100: #FFEDD5;
-            --orange-200: #FED7AA;
-            --orange-500: #F97316;
-            --orange-600: #EA580C;
-            --orange-700: #C2410C;
+            --bg-alt: #F4F7F0;
+            --croc-50: #F4F7F0;
+            --croc-100: #E4ECD8;
+            --croc-200: #C9D9B1;
+            --croc-500: #5C7A29;
+            --croc-600: #4A6521;
+            --croc-700: #3A5118;
             --blue-500: #3B82F6;
             --blue-50: #EFF6FF;
             --blue-100: #DBEAFE;
@@ -67,7 +67,7 @@
             height: 100%; padding: 0 1.5rem;
         }
         .nav-brand {
-            font-size: 1.15rem; font-weight: 700; color: var(--orange-600);
+            font-size: 1.15rem; font-weight: 700; color: var(--croc-600);
             display: flex; align-items: center; gap: 0.4rem;
             text-decoration: none;
         }
@@ -86,11 +86,11 @@
             user-select: none;
         }
         .nav-tab:hover { color: var(--text-primary); }
-        .nav-tab.active { color: var(--orange-600); }
+        .nav-tab.active { color: var(--croc-600); }
         .nav-tab.active::after {
             content: ''; position: absolute;
             bottom: 0; left: 1rem; right: 1rem;
-            height: 3px; background: var(--orange-500);
+            height: 3px; background: var(--croc-500);
             border-radius: 3px 3px 0 0;
         }
         .nav-right { display: flex; align-items: center; gap: 1rem; }
@@ -101,14 +101,14 @@
             font-size: 0.8rem; color: var(--text-muted);
         }
         .tone-toggle span { white-space: nowrap; }
-        .tone-toggle .active-label { color: var(--orange-600); font-weight: 600; }
+        .tone-toggle .active-label { color: var(--croc-600); font-weight: 600; }
         .toggle-track {
             width: 40px; height: 22px;
-            background: var(--orange-100);
+            background: var(--croc-100);
             border-radius: 11px; cursor: pointer;
             position: relative; transition: background 0.2s;
         }
-        [data-tone="tech"] .toggle-track { background: var(--orange-500); }
+        [data-tone="tech"] .toggle-track { background: var(--croc-500); }
         .toggle-knob {
             position: absolute; top: 2px; left: 2px;
             width: 18px; height: 18px;
@@ -144,7 +144,7 @@
             margin-bottom: 1.25rem; letter-spacing: -0.02em;
         }
         .hero-title .highlight {
-            background: linear-gradient(135deg, var(--orange-500), var(--orange-700));
+            background: linear-gradient(135deg, var(--croc-500), var(--croc-700));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             background-clip: text;
         }
@@ -164,15 +164,15 @@
             transition: all 0.2s; border: 2px solid transparent;
         }
         .btn-primary {
-            background: var(--orange-500); color: #fff;
-            border-color: var(--orange-500);
+            background: var(--croc-500); color: #fff;
+            border-color: var(--croc-500);
         }
-        .btn-primary:hover { background: var(--orange-600); border-color: var(--orange-600); }
+        .btn-primary:hover { background: var(--croc-600); border-color: var(--croc-600); }
         .btn-outline {
-            background: transparent; color: var(--orange-600);
-            border-color: var(--orange-500);
+            background: transparent; color: var(--croc-600);
+            border-color: var(--croc-500);
         }
-        .btn-outline:hover { background: var(--orange-50); }
+        .btn-outline:hover { background: var(--croc-50); }
 
         /* ── Cards ── */
         .card {
@@ -192,8 +192,8 @@
             display: flex; align-items: center; justify-content: center;
             border-radius: 12px; font-size: 1.4rem;
             margin-bottom: 1.25rem;
-            background: var(--orange-50);
-            color: var(--orange-500);
+            background: var(--croc-50);
+            color: var(--croc-500);
         }
         .card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
         .card p { color: var(--text-secondary); font-size: 0.95rem; }
@@ -205,7 +205,7 @@
         /* ── Comparison table ── */
         .compare-table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--border); background: var(--bg-card); }
         .compare-table th, .compare-table td { padding: 1rem 1.5rem; text-align: left; font-size: 0.95rem; }
-        .compare-table thead th { background: var(--orange-50); color: var(--orange-700); font-weight: 600; border-bottom: 1px solid var(--border); }
+        .compare-table thead th { background: var(--croc-50); color: var(--croc-700); font-weight: 600; border-bottom: 1px solid var(--border); }
         .compare-table thead th:first-child { color: var(--text-muted); }
         .compare-table tbody td { border-bottom: 1px solid var(--border); vertical-align: top; }
         .compare-table tbody tr:last-child td { border-bottom: none; }
@@ -225,24 +225,24 @@
             max-width: 280px; flex: 1; min-width: 220px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .eco-node:hover { border-color: var(--orange-200); box-shadow: var(--shadow-md); }
+        .eco-node:hover { border-color: var(--croc-200); box-shadow: var(--shadow-md); }
         .eco-node i { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
         .eco-node.node-buyer i { color: var(--blue-500); }
-        .eco-node.node-platform i { color: var(--orange-500); }
+        .eco-node.node-platform i { color: var(--croc-500); }
         .eco-node.node-seller i { color: var(--green-500); }
         .eco-node h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
         .eco-node p { font-size: 0.88rem; color: var(--text-secondary); }
         .eco-arrow {
-            font-size: 1.5rem; color: var(--orange-200);
+            font-size: 1.5rem; color: var(--croc-200);
         }
 
         /* ── Tech highlights grid ── */
         .tech-badge {
             display: inline-flex; align-items: center; gap: 0.4rem;
             padding: 0.4rem 0.9rem;
-            background: var(--orange-50); color: var(--orange-700);
+            background: var(--croc-50); color: var(--croc-700);
             border-radius: 20px; font-size: 0.82rem; font-weight: 600;
-            border: 1px solid var(--orange-100);
+            border: 1px solid var(--croc-100);
         }
         .tech-badges { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.5rem; }
 
@@ -281,10 +281,10 @@
             display: flex; align-items: flex-start; gap: 0.6rem;
             font-size: 0.88rem; color: var(--text-primary);
         }
-        .integration-list li i { color: var(--orange-500); margin-top: 0.15rem; flex-shrink: 0; }
+        .integration-list li i { color: var(--croc-500); margin-top: 0.15rem; flex-shrink: 0; }
         .integration-list code {
-            background: var(--orange-50); padding: 0.1rem 0.4rem;
-            border-radius: 4px; font-size: 0.82rem; color: var(--orange-700);
+            background: var(--croc-50); padding: 0.1rem 0.4rem;
+            border-radius: 4px; font-size: 0.82rem; color: var(--croc-700);
         }
         .integration-ref {
             margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);
@@ -297,16 +297,16 @@
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius-lg);
         }
-        .trust-card i { font-size: 2.5rem; color: var(--orange-500); margin-bottom: 1rem; display: block; }
+        .trust-card i { font-size: 2.5rem; color: var(--croc-500); margin-bottom: 1rem; display: block; }
         .trust-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
         .trust-card p { font-size: 0.88rem; color: var(--text-secondary); }
 
         /* API table */
         .api-table { width: 100%; border-collapse: separate; border-spacing: 0; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; font-size: 0.88rem; background: var(--bg-card); }
-        .api-table th { background: var(--orange-50); color: var(--orange-700); font-weight: 600; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .api-table th { background: var(--croc-50); color: var(--croc-700); font-weight: 600; padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
         .api-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); }
         .api-table tr:last-child td { border-bottom: none; }
-        .api-table code { background: var(--orange-50); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; color: var(--orange-700); }
+        .api-table code { background: var(--croc-50); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; color: var(--croc-700); }
 
         /* Security list */
         .security-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -316,22 +316,22 @@
             background: var(--bg-card); border: 1px solid var(--border);
             border-radius: var(--radius);
         }
-        .security-list li i { color: var(--orange-500); margin-top: 0.15rem; flex-shrink: 0; }
+        .security-list li i { color: var(--croc-500); margin-top: 0.15rem; flex-shrink: 0; }
 
         /* ── Open source banner ── */
         .oss-banner {
             text-align: center; padding: 3rem 2rem;
-            background: linear-gradient(135deg, var(--orange-500), var(--orange-700));
+            background: linear-gradient(135deg, var(--croc-500), var(--croc-700));
             border-radius: var(--radius-lg);
             color: #fff;
         }
         .oss-banner h3 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.75rem; }
         .oss-banner p { font-size: 1rem; opacity: 0.9; max-width: 560px; margin: 0 auto 1.5rem; }
         .oss-banner .btn {
-            background: #fff; color: var(--orange-600);
+            background: #fff; color: var(--croc-600);
             border-color: #fff;
         }
-        .oss-banner .btn:hover { background: var(--orange-50); }
+        .oss-banner .btn:hover { background: var(--croc-50); }
 
         /* ── Footer ── */
         .site-footer {
@@ -345,7 +345,7 @@
             display: flex; align-items: center; gap: 0.3rem;
             transition: color 0.2s;
         }
-        .footer-links a:hover { color: var(--orange-500); }
+        .footer-links a:hover { color: var(--croc-500); }
 
         /* ── Responsive ── */
         @media (max-width: 1024px) {
@@ -405,13 +405,13 @@
             <!-- 公众版 Hero -->
             <div class="tone-public">
                 <h1 class="hero-title">AI 能力，<span class="highlight">不该被锁在别人的电脑里</span></h1>
-                <p class="hero-subtitle">Croc Tavern 正在构建一个 AI 能力的自由贸易市场 —— 你说你要什么结果，我们帮你找到最好的执行者。无需安装、无需配置、无需信任。</p>
+                <p class="hero-subtitle">Croc Tavern 正在构建一个 AI 能力的自由贸易市场。我们叫它 Remote Subagent —— 你说你要什么结果，我们帮你找到最好的远程执行者。无需安装、无需配置、无需信任。</p>
             </div>
 
             <!-- 技术版 Hero -->
             <div class="tone-tech">
-                <h1 class="hero-title"><span class="highlight">Subagent Hiring Protocol</span></h1>
-                <p class="hero-subtitle">一套面向远程 AI subagent 的雇佣协议。合约优先、幂等优先、传输可迁移、最小信任。基于邮箱 MCP 验证交易闭环，通过 TransportAdapter 抽象保留迁移路径。</p>
+                <h1 class="hero-title"><span class="highlight">Remote Subagent Hiring Protocol</span></h1>
+                <p class="hero-subtitle">一套面向 Remote Subagent 的雇佣协议。Remote Subagent 是已部署在卖家环境中、通过标准化合约接口远程调用的 AI 能力单元。协议遵循合约优先、幂等优先、传输可迁移、最小信任四大原则。</p>
             </div>
 
             <div class="hero-cta">
@@ -424,8 +424,8 @@
     <!-- 公众版: 痛点对比 -->
     <div class="section section-alt tone-public">
         <div class="container">
-            <h2 class="section-title">旧世界 vs 新范式</h2>
-            <p class="section-subtitle">传统 AI 能力分发模式正在制造摩擦，而不是消除它。</p>
+            <h2 class="section-title">旧世界 vs Remote Subagent</h2>
+            <p class="section-subtitle">传统 AI 能力分发模式正在制造摩擦，Remote Subagent 正在消除它。</p>
 
             <table class="compare-table">
                 <thead>
@@ -465,7 +465,7 @@
     <div class="section section-alt tone-tech">
         <div class="container">
             <h2 class="section-title">Core Design Principles</h2>
-            <p class="section-subtitle">四条贯穿全链路的架构约束，确保协议的可迁移性和最小信任。</p>
+            <p class="section-subtitle">Remote Subagent 协议的四条架构约束，确保可迁移性和最小信任。</p>
 
             <div class="grid-2">
                 <div class="card">
@@ -595,19 +595,19 @@
 
             <div class="grid-2">
                 <div class="card">
-                    <h3><i class="ri-code-s-slash-line" style="color:var(--orange-500);margin-right:0.4rem"></i>合约演进</h3>
+                    <h3><i class="ri-code-s-slash-line" style="color:var(--croc-500);margin-right:0.4rem"></i>合约演进</h3>
                     <p>合约字段定义、Schema 版本策略、非破坏性 vs 破坏性变更的迁移流程设计。</p>
                 </div>
                 <div class="card">
-                    <h3><i class="ri-shield-check-line" style="color:var(--orange-500);margin-right:0.4rem"></i>安全与幂等</h3>
+                    <h3><i class="ri-shield-check-line" style="color:var(--croc-500);margin-right:0.4rem"></i>安全与幂等</h3>
                     <p>Token 传输安全强化、API Key 生命周期管理、弱网环境下的幂等语义保障。</p>
                 </div>
                 <div class="card">
-                    <h3><i class="ri-terminal-box-line" style="color:var(--orange-500);margin-right:0.4rem"></i>接入模板</h3>
+                    <h3><i class="ri-terminal-box-line" style="color:var(--croc-500);margin-right:0.4rem"></i>接入模板</h3>
                     <p>多语言 Buyer / Seller 模板（Python / Node.js / Go），降低接入门槛。</p>
                 </div>
                 <div class="card">
-                    <h3><i class="ri-line-chart-line" style="color:var(--orange-500);margin-right:0.4rem"></i>指标与排序</h3>
+                    <h3><i class="ri-line-chart-line" style="color:var(--croc-500);margin-right:0.4rem"></i>指标与排序</h3>
                     <p>最小可解释排序算法、同类对比策略、平台验证任务评测体系。</p>
                 </div>
             </div>
@@ -647,7 +647,7 @@
             </div>
             <div class="tone-tech">
                 <h1 class="hero-title"><span class="highlight">Integration Guide</span></h1>
-                <p class="hero-subtitle">Buyer Controller Skill 与 Seller Agent Template 的集成要点。详细流程见 integration-playbook-mvp.md。</p>
+                <p class="hero-subtitle">Buyer Controller Skill 与 Seller Agent Template 的集成要点。Remote Subagent 通过标准化合约交互。详细流程见 integration-playbook-mvp.md。</p>
             </div>
         </div>
     </div>

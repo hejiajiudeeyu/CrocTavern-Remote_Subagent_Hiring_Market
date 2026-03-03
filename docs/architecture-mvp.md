@@ -1,9 +1,9 @@
-# Croc Tavern | Subagent Hiring Market 架构设计（MVP）
+# Croc Tavern | Remote Subagent Hiring Market 架构设计（MVP）
 
 ## 1. 范围与原则
 
 ### 1.1 MVP 目标
-- 用邮箱 MCP 验证「远程 subagent 雇佣」交易闭环是否成立。
+- 用邮箱 MCP 验证「Remote Subagent 雇佣」交易闭环是否成立。
 - 平台只做最小控制面：目录、token、指标聚合。
 - 买家仅处理输入输出，不承载卖家执行依赖。
 
@@ -46,7 +46,7 @@
 - `request_id`：一次任务请求全局唯一（UUIDv7 推荐）。
 - `buyer_id`：买家主体标识。
 - `seller_id`：卖家主体标识。
-- `subagent_id`：卖家发布的可调用单元标识。
+- `subagent_id`：卖家发布的 Remote Subagent 标识。
 - `contract_version`：任务合约版本（如 `0.1.0`）。
 - `result_version`：结果包版本（如 `0.1.0`）。
 

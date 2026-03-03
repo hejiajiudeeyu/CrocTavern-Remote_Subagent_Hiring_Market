@@ -11,6 +11,7 @@
   ],
   "version": "1.0.0",
   "status": "active",
+  "delivery_address": "tasks@example.com",
   "contact": {
     "email": "ops@example.com"
   },

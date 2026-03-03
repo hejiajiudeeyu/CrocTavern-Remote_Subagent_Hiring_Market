@@ -89,6 +89,7 @@ Query 参数：
         "updated_at": "2026-03-02T12:00:00Z"
       },
       "seller_public_key": "-----BEGIN PUBLIC KEY-----...",
+      "delivery_address": "tasks@foxlab.example",
       "template_ref": "docs/templates/subagents/foxlab.text.classifier.v1/"
     }
   ],
@@ -116,6 +117,7 @@ Query 参数：
 - `capabilities`（必填，字符串数组）
 - `version`（必填）
 - `status`（必填，`active|inactive|blocked`）
+- `delivery_address`（必填，seller 任务投递邮箱，buyer 选中后据此发送任务邮件）
 - `contact.email`（可选）
 - `endpoint_hint`（可选，仅元数据，不用于任务转发）
 - `supported_task_types`（必填，字符串数组）

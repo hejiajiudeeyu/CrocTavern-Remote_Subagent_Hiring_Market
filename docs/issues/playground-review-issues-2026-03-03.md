@@ -111,3 +111,71 @@
 - 目录查询步骤：展示精简字段；新增“选中后拉详情”步骤，详情内包含 `delivery_address`。
 - 可选新增步骤（标注 v0.2）：`request_sent` 与 `request_completed` 事件。
 
+## 5. 最终采纳决策（2026-03-03）
+
+对照 `architecture-mvp.md`、`platform-api-v0.1.md`、`playground.html` 现有设计，逐条给出最终结论。
+
+### 5.1 seller 注册补充 support 邮箱
+
+- **决策：采纳（v0.1）**
+- seller 主体注册新增 `support_email`（必填）。`contact_email`（原工作邮箱）继续保留。
+- 文档变更：playground S01 补字段；integration-playbook seller 准备清单补说明。
+
+### 5.2 buyer_id 与 seller_id 是否合并
+
+- **决策：不采纳（维持分离）**
+- 与架构文档已有设计一致：权限边界不同、审计口径不同、风控/结算独立。
+- 后续可引入 `account_id` 上层主体概念，但 v0.1 不做。
+- 无文档变更。
+
+### 5.3 `capability_overview` 位置下沉
+
+- **决策：采纳（v0.1）**
+- 从主体注册移至 subagent 级。playground S01 移除 `capability_overview`，在 S03（subagent 表单）通过 `capabilities` + `supported_task_types` + `description` 体现。
+- 与 `platform-api-v0.1.md` 3.2 节 subagent 注册字段已对齐，无需额外改 API 文档。
+
+### 5.4 seller 服务描述与更新通道
+
+- **决策：采纳（v0.1 描述字段就绪，更新通道延后）**
+- subagent 级字段（`display_name`、`description`、`capabilities`、`supported_task_types`、`template_ref` 等）已在 API 文档中定义。
+- v0.1 保持"表单提交 + CLI 审核导入"，不额外开放自助更新接口。
+- 后续版本开放 seller 发起更新申请。
+
+### 5.5 buyer 目录查询最小字段与 delivery_address
+
+- **决策：部分采纳**
+- **v0.1 做法**：目录查询仍返回完整字段（条目少，分离收益有限），但在目录响应和 subagent 注册中补上 `delivery_address`（seller 任务投递邮箱，必填）。这是原始意见中"邮箱地址没给出"的有效问题。
+- **v0.2 规划**：引入 `GET /v1/catalog/subagents/{subagent_id}` 详情接口，实现轻列表 + 详情分离。
+- 文档变更：`platform-api-v0.1.md` 补字段；`playground.html` S05 响应补字段；模板 JSON/NDJSON 补字段。
+
+### 5.6 buyer 发邮件后通知服务端
+
+- **决策：延后到 v0.2**
+- `POST /v1/requests/{request_id}/sent` 有排障价值（区分"未发出"与"已发出未收 ACK"），但 v0.1 优先保持链路精简。
+- 登记到 `development-tracker.md` 后续开发。
+
+### 5.7 对称 token + 邮箱双认证
+
+- **决策：对称 token 不采纳；buyer_email_hash 延后 v0.2**
+- 对称 token 双发增加密钥管理复杂度，当前 introspect + claims 绑定已足够。
+- `buyer_email_hash` 双因素校验作为安全增强项，延后到 v0.2。
+- 登记到 `development-tracker.md` 后续开发。
+
+### 5.8 seller 完成后通知服务端
+
+- **决策：延后到 v0.2**
+- `POST /v1/requests/{request_id}/completed` 有运营价值（完成率、时延），但 v0.1 保持 ACK-only。
+- 登记到 `development-tracker.md` 后续开发。
+
+### 5.9 决策汇总
+
+| Issue | 结论 | 版本 |
+|---|---|---|
+| 1. support_email | 采纳 | v0.1 |
+| 2. id 合并 | 不采纳 | — |
+| 3. capability_overview 下沉 | 采纳 | v0.1 |
+| 4. 服务描述与更新 | 采纳（描述就绪，更新通道延后） | v0.1 / 后续 |
+| 5. 目录分阶段 + delivery_address | 部分采纳（补 delivery_address） | v0.1 / v0.2 |
+| 6. request_sent 事件 | 延后 | v0.2 |
+| 7. 对称 token / buyer_email_hash | 不采纳 / 延后 | — / v0.2 |
+| 8. request_completed 事件 | 延后 | v0.2 |

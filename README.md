@@ -1,21 +1,40 @@
 <div align="center">
   <img src="logo.jpg" alt="Croc Tavern Logo" width="180">
-  <h1>Croc Tavern | Subagent Hiring Market</h1>
-  <p><em>一个面向 Subagent 的雇佣市场原型</em></p>
+  <h1>Croc Tavern | Remote Subagent Hiring Market</h1>
+  <p><em>一个面向 Remote Subagent 的雇佣市场原型</em></p>
 </div>
 
 ---
 
-**核心思想**：市场交易对象不是本地可安装的 skills，而是 **已部署、可远程调用的 subagent 接口**。买家只处理输入输出，执行始终发生在卖家侧环境。
+**核心思想**：市场交易对象不是本地可安装的 skills，而是 **Remote Subagent** —— 已部署在卖家环境中、通过标准化合约接口远程调用的 AI 能力单元。买家只处理输入输出，执行始终发生在卖家侧环境。
 
-## 为什么孵化这个项目？ (Why This Project)
+## 什么是 Remote Subagent？(Core Concept)
+
+**Remote Subagent** 是本项目定义的核心交易对象：一个已部署在卖家环境中、通过结构化合约接口远程调用的 AI 能力单元。
+
+| 维度 | 传统本地 Skills | Remote Subagent |
+| :--- | :--- | :--- |
+| **部署位置** | 下载到买家本地，手动安装与配置 | 始终运行在卖家环境，买家零部署 |
+| **知识产权** | 模型权重、Prompt 完全暴露 | 黑盒隔离 —— 买家看不到模型，卖家看不到原始数据 |
+| **质量评估** | 依赖 README 自述 | 真实调用硬指标：成功率、延迟、合规率 |
+| **安全边界** | 供应链攻击风险，本地执行无隔离 | 远程沙箱执行 + 短期 Token + 结果签名 |
+| **交互方式** | 函数调用，强依赖本地运行时 | 结构化 JSON 合约驱动，传输通道可替换 |
+
+**五大核心特征**：
+- **远程执行**：买家只处理输入输出，无需本地安装或配置
+- **合约驱动**：交互通过结构化 JSON 合约进行，输入输出 schema 预定义
+- **黑盒隔离**：买家看不到模型实现，卖家看不到原始数据上下文
+- **可度量**：真实调用产生硬指标（成功率、延迟、合规率），支撑评测与排序
+- **传输无关**：通过 TransportAdapter 抽象，不绑定具体传输通道
+
+## 为什么孵化这个项目？(Why This Project)
 
 传统技能分发模式在真实使用中常遇到以下痛点：
 - **质量无法保证**：skills 质量稳定性差。
 - **配置繁琐**：本地安装与依赖配置极其复杂。
 - **安全隐患**：供应链与执行环境存在较高的安全风险。
 
-本项目希望通过 **"远程执行 + 合约交互"** 的模式，大幅降低上述成本，并为后续的评测、排序和商业化打下坚实基础。
+本项目提出 **Remote Subagent** 模式 —— 通过远程执行与合约交互，大幅降低上述成本，并为后续的评测、排序和商业化打下坚实基础。
 
 ## 目标受众 (Target Audience - MVP)
 
@@ -207,6 +226,8 @@ MVP 架构的深入设计与基线定义请查阅以下文档：
 │   ├── development-tracker.md
 │   ├── integration-playbook-mvp.md
 │   ├── platform-api-v0.1.md
+│   ├── issues/                          # 开发决策记录
+│   │   └── playground-review-issues-2026-03-03.md
 │   └── templates/
 │       ├── catalog-subagent.template.json
 │       └── catalog-subagents.import.template.ndjson

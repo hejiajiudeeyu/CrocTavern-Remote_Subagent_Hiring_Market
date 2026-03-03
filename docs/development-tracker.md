@@ -105,6 +105,10 @@
 
 ## 3) 后续开发（不在 v0.1）
 
+- [ ] `POST /v1/requests/{request_id}/sent`（买家发送确认事件，区分"未发出"与"已发出未收 ACK"）— 来源：playground review issue #6
+- [ ] `POST /v1/requests/{request_id}/completed`（卖家完成事件，提升完成率/时延观测）— 来源：playground review issue #8
+- [ ] `GET /v1/catalog/subagents/{subagent_id}`（目录详情接口，实现轻列表 + 详情分离）— 来源：playground review issue #5
+- [ ] token claims 增加 `buyer_email_hash`，seller 侧做邮箱 + claims 双因素校验 — 来源：playground review issue #7
 - [ ] 检索增强（联想检索、模糊搜索、领域策略、搜索排序）
 - [ ] 目录快照/增量接口（`/snapshot`、`/changes`）
 - [ ] 实时事件推送（SSE/WebSocket），替代轮询

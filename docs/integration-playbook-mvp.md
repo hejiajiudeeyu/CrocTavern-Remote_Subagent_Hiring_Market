@@ -111,7 +111,7 @@
 ## 3. Seller 端详细流程
 
 ## 3.1 启动前准备
-- 先完成 seller 主体注册并领取 API Key。
+- 先完成 seller 主体注册并领取 API Key。注册时需提供 `contact_email`（工作邮箱）和 `support_email`（运维/支持邮箱，必填）。
 - 配置邮箱 MCP 读取任务邮箱。
 - 配置 token 验证能力：
   - 在线 introspect（`POST /v1/tokens/introspect`，v0.1 必做）
