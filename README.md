@@ -12,6 +12,12 @@
 - [Ecosystem 介绍](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/ecosystem.html)
 - [Playground 演示](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/playground.html)
 
+**社区与贡献**：
+- [Contributing Guide](CONTRIBUTING.md)
+- [Security Policy](SECURITY.md)
+- [Roadmap](ROADMAP.md)
+- [Discord](https://discord.gg/e4nDukFAc6)
+
 ## 什么是 Remote Subagent？(Core Concept)
 
 **Remote Subagent** 是本项目定义的核心交易对象：一个已部署在卖家环境中、通过结构化合约接口远程调用的 AI 能力单元。
