@@ -217,7 +217,8 @@ MVP 架构的深入设计与基线定义请查阅以下文档：
 - [docs/templates/catalog-subagents.import.template.ndjson](docs/templates/catalog-subagents.import.template.ndjson) - 批量导入模板
 
 **交互式演示页面**：
-- [playground.html](playground.html) - 分步演示 Buyer / Seller / Platform 操作链路并预填示例
+- [site/ecosystem.html](site/ecosystem.html) - 生态介绍（首页）
+- [site/playground.html](site/playground.html) - 分步演示 Buyer / Seller / Platform 操作链路并预填示例
 
 ## 代码库结构 (Repository Structure)
 
@@ -235,8 +236,10 @@ MVP 架构的深入设计与基线定义请查阅以下文档：
 │   └── templates/
 │       ├── catalog-subagent.template.json
 │       └── catalog-subagents.import.template.ndjson
-├── ecosystem.html
-├── playground.html
+├── site/                                # 站点页面
+│   ├── ecosystem.html                   # 生态介绍（首页）
+│   └── playground.html                  # MVP Playground 演示
+├── index.html                           # 重定向至 site/ecosystem.html
 ├── logo.jpg
 ├── LICENSE
 └── README.md
