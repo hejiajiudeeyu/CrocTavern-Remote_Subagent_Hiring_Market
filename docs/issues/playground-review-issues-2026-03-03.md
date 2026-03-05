@@ -3,6 +3,9 @@
 来源：用户对 `playground.html` 的逐条评审意见。  
 目的：沉淀问题、给出建议答复，并作为后续修改清单。
 
+> 说明：本文件是 2026-03-03 的评审快照，包含部分“讨论阶段方案”。
+> 当前冻结规范以 `docs/platform-api-v0.1.md`、`docs/architecture-mvp.md`、`docs/defaults-v0.1.md` 为准。
+
 ## 1. 问题清单（原始意见）
 
 1. seller 注册时，应提供除了工作邮箱外的 support 邮箱。

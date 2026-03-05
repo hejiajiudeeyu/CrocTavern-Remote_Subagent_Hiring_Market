@@ -5,7 +5,7 @@
 - 本次要实现（进入 v0.1 开发）
 - 后续开发（明确不在 v0.1）
 
-更新时间：2026-03-02
+更新时间：2026-03-05
 
 ## 1) 已完成（架构与规范文档）
 
@@ -41,11 +41,12 @@
 ## 2) 本次要实现（进入 v0.1 开发）
 
 ## 2.1 服务端（Platform Control Plane）
-- [ ] API Key 鉴权中间件（buyer/seller 分主体 key）
-- [ ] 买家/卖家主体注册与 API Key 签发流程
+- [ ] API Key 鉴权中间件（`user_id + role_scopes`，含资源归属校验）
+- [ ] 用户主体注册与 API Key 签发流程（默认 buyer，agent 审核通过后激活 seller）
 - [ ] `GET /v1/catalog/subagents`（目录查询，支持 `status/availability_status/capability`）
 - [ ] `POST /v1/tokens/task`（签发 task token）
 - [ ] `POST /v1/tokens/introspect`（v0.1 必做，卖家统一在线校验）
+- [ ] `POST /v1/requests/{request_id}/delivery-meta`（买家单次拉取投递元数据）
 - [ ] `POST /v1/requests/{request_id}/ack`（卖家 ACK 事件）
 - [ ] `GET /v1/requests/{request_id}/events`（买家事件轮询）
 - [ ] `POST /v1/sellers/{seller_id}/heartbeat`（卖家心跳）
@@ -58,9 +59,14 @@
 - [ ] 目录遍历/分类过滤选择 seller
 - [ ] 任务合约生成（含 `request_id`）
 - [ ] 申请 token 并写入合约
+- [ ] 申请 delivery-meta 并使用单次地址发信
 - [ ] 邮箱 MCP 发任务邮件
 - [ ] ACK 事件轮询与 `ack_deadline` 超时处理
 - [ ] 邮箱结果轮询
+- [ ] Buyer Controller `soft_timeout` 继续等待确认（默认询问 Buyer Agent）
+- [ ] Buyer Controller `hard_timeout` 自动终态（停止本地等待，不依赖远端 kill）
+- [ ] Buyer Agent 轮询 Buyer Controller 内部接口（`GET /controller/requests/{request_id}`）
+- [ ] Buyer Agent 提交超时决策到 Buyer Controller（`POST /controller/requests/{request_id}/timeout-decision`）
 - [ ] 验签 + schema 校验 + 最小验收
 - [ ] 状态机与幂等状态落库
 - [ ] 买家指标上报
@@ -70,7 +76,8 @@
 - [ ] token 校验（claims + 过期 + 受众）
 - [ ] 护栏检查（预算/超时/任务类型）
 - [ ] `request_id` 幂等去重与结果回放
-- [ ] 先发 ACK 事件，再执行任务
+- [ ] 校验通过后入队并发 ACK，再执行任务
+- [ ] 任务队列（priority/FIFO/tenant_quota + lease_ttl）
 - [ ] 执行器接口 + 至少 1 个示例执行器
 - [ ] 结果包签名与同线程回信
 - [ ] 卖家心跳周期上报
@@ -135,11 +142,12 @@
 - [x] seller 不维护 subagent 列表，平台导入时建立 seller-subagent 关联
 - [x] API 鉴权方式：API Key
 - [x] 目录提交流程：表单提交 + CLI 审核导入
-- [x] 主体接入方式：买卖双方先注册，再发 key
+- [x] 主体接入方式：用户先注册并获得 buyer 角色，seller 角色由 agent 审核通过后激活
 - [x] 定价模式：免费试用（pricing_mode=reference_only, settlement_enabled=false）
 - [x] 邮件投递预算：email_delivery_budget_s=60
 - [x] introspect 性能目标：P99 < 200ms，缓存 TTL=30s
 - [x] 能力声明模板存储：Git 仓库 `docs/templates/subagents/{subagent_id}/`，后续可迁移至独立存储
+- [x] 能力声明模板下发：Buyer 统一通过平台 API `GET /v1/catalog/subagents/{subagent_id}/template-bundle`
 
 ## 5) 待你确认（参数冻结）
 

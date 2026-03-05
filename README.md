@@ -103,6 +103,7 @@ Current MVP focuses on validating the transaction loop, not production-grade low
 - Platform scope: minimal control plane only
 - Auth mode: API Key (control plane)
 - Buyer side: request orchestration + validation
+- Buyer timeout policy: ask at `soft_timeout`, auto-finalize `TIMED_OUT` at `hard_timeout` if no continue signal
 - Seller side: validation + execution + signed result + idempotency
 
 ## Platform API (v0.1)
@@ -111,10 +112,13 @@ Task payload and result payload are exchanged via Email MCP.
 
 | Method | Endpoint | Purpose |
 | :--- | :--- | :--- |
+| `POST` | `/v1/users/register` | Register user identity and issue API key (default buyer scope) |
 | `GET` | `/v1/catalog/subagents` | Discover available subagents |
 | `POST` | `/v1/catalog/subagents` | Register/update catalog item (MVP import-oriented) |
+| `GET` | `/v1/catalog/subagents/{subagent_id}/template-bundle` | Fetch capability template bundle for contract construction |
 | `POST` | `/v1/tokens/task` | Request short-lived task token |
 | `POST` | `/v1/tokens/introspect` | Validate token online (seller side) |
+| `POST` | `/v1/requests/{request_id}/delivery-meta` | Fetch request-scoped delivery address and thread policy |
 | `POST` | `/v1/metrics/events` | Submit minimal metrics events |
 | `GET` | `/v1/metrics/summary` | Query aggregated metrics |
 | `POST` | `/v1/requests/{request_id}/ack` | Seller ACK event |
@@ -129,6 +133,7 @@ Task payload and result payload are exchanged via Email MCP.
 - [Data Collection](docs/data-collection-mvp.md)
 - [Defaults v0.1](docs/defaults-v0.1.md)
 - [Development Tracker](docs/development-tracker.md)
+- [Diagram Set](docs/diagrams/README.md)
 
 ## Resource Templates
 

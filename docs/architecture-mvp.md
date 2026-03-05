@@ -4,7 +4,7 @@
 
 ### 1.1 MVP 目标
 - 用邮箱 MCP 验证「Remote Subagent 雇佣」交易闭环是否成立。
-- 平台只做最小控制面：目录、token、指标聚合。
+- 平台只做最小控制面：目录、token、投递元数据、事件、指标聚合。
 - 买家仅处理输入输出，不承载卖家执行依赖。
 
 ### 1.2 非目标
@@ -31,7 +31,7 @@
 - Seller Agent Template
   - 收信、合约校验、token 校验、执行器调用、结果回信、幂等去重、指标上报。
 - Platform Minimal Service
-  - 目录注册/查询、token 签发/校验、请求事件接收、seller 心跳与可用性判定、指标接收/汇总。
+  - 目录注册/查询、模板包下发、token 签发/校验、投递元数据下发、请求事件接收、seller 心跳与可用性判定、指标接收/汇总。
 - Email MCP Adapter
   - 发送任务邮件、按规则拉取线程回信、邮件元数据映射。
 
@@ -44,11 +44,17 @@
 
 ## 3.1 必备标识
 - `request_id`：一次任务请求全局唯一（UUIDv7 推荐）。
-- `buyer_id`：买家主体标识。
-- `seller_id`：卖家主体标识。
+- `user_id`：用户主体标识（注册后默认具备 buyer 角色）。
+- `buyer_id`：买家角色标识（可与 `user_id` 同值映射）。
+- `seller_id`：卖家角色标识（由 seller agent 审核通过后激活）。
 - `subagent_id`：卖家发布的 Remote Subagent 标识。
 - `contract_version`：任务合约版本（如 `0.1.0`）。
 - `result_version`：结果包版本（如 `0.1.0`）。
+
+v0.1 映射约束（冻结）：
+- `buyer_id = user_id`（一对一）
+- `seller_id` 在该用户首次 seller agent 审核通过并导入成功时生成
+- v0.1 默认一个 `user_id` 仅绑定一个 `seller_id`（后续版本再支持多 seller identity）
 
 ## 3.2 兼容策略
 - 仅允许向后兼容新增字段（可选字段）。
@@ -163,6 +169,18 @@
   - `Content-Type: application/json` 附件或正文块
   - 明确 `schema_type=task_contract` 或 `schema_type=result_package`
 
+## 4.4 错误结果包与投递元数据规则
+
+### 错误结果包校验（与成功结果同级）
+- `status=FAILED|TIMED_OUT|REJECTED` 时必须返回 `error.code/message/retryable`。
+- Buyer 对错误结果包执行与成功包一致的机械校验：`request_id`、`seller_id/subagent_id`、签名、版本。
+- 校验通过的错误结果包可进入 Buyer 反馈循环（重试/换 seller/进入争议），而不是直接丢弃。
+
+### 投递地址暴露策略（v0.1）
+- `delivery_address` 不在目录批量查询中下发，避免被目录抓取滥用。
+- Buyer 在获取 token 后，通过 `POST /v1/requests/{request_id}/delivery-meta` 单次获取投递地址与线程策略。
+- `delivery-meta` 与 `request_id + seller_id + subagent_id + buyer_id` 绑定，过期后不可复用。
+
 ## 4.5 能力声明模板（Capability Templates）
 
 ### 目的
@@ -181,7 +199,7 @@ docs/templates/subagents/{subagent_id}/
 ```
 
 ### 目录关联
-目录条目新增 `template_ref` 字段，指向该 subagent 的模板目录路径：
+目录条目新增 `template_ref` 字段，作为该 subagent 模板语义绑定键：
 ```json
 {
   "subagent_id": "foxlab.text.classifier.v1",
@@ -192,7 +210,7 @@ docs/templates/subagents/{subagent_id}/
 
 ### 渐进式披露流程
 1. **浏览目录**：买家查询 `/v1/catalog/subagents`，获得概要信息（description、capabilities、pricing_hint 等）。
-2. **选择 subagent**：买家确定目标 subagent 后，通过 `template_ref` 获取模板文件。
+2. **选择 subagent**：买家确定目标 subagent 后，通过 `GET /v1/catalog/subagents/{subagent_id}/template-bundle?template_ref=...` 获取模板包。
 3. **构造合约**：买家参照 `input.schema.json` 填写 `task.input`，用 `output.schema.json` 设定 `task.output_schema`。
 4. **参考示例**：`example-contract.json` 和 `example-result.json` 提供端到端的请求-响应样本。
 
@@ -200,7 +218,7 @@ docs/templates/subagents/{subagent_id}/
 - 模板文件由卖家维护，通过 PR 提交更新。
 - Schema 变更遵循合约版本策略（§3.2）：仅允许向后兼容新增字段。
 - 平台在合并模板 PR 后自动更新目录的 `updated_at` 时间戳。
-- MVP 阶段模板存储在 Git 仓库中，后续可迁移至独立存储服务。
+- MVP 阶段模板仍存储在 Git 仓库中，但对 Buyer 统一通过平台 API 下发，不暴露仓库直读依赖。
 
 ## 5. Token 与签名模型
 
@@ -235,7 +253,7 @@ docs/templates/subagents/{subagent_id}/
 - 后续迁移到 HTTPS 传输通道后，此风险自然消除。
 
 ## 5.5 API Key 生命周期
-- **签发**：买卖双方完成主体注册后，平台签发 API Key。
+- **签发**：用户主体注册成功后，平台签发 API Key（默认 `role_scopes={buyer}`）。
 - **轮换流程**：
   1. 主体申请新 key（平台签发，旧 key 仍有效）。
   2. 双 key 共存窗口：建议 24 小时。
@@ -243,7 +261,7 @@ docs/templates/subagents/{subagent_id}/
 - **泄露应急**：
   - MVP 阶段支持人工通知平台管理员手动吊销。
   - 后续规划 `POST /v1/keys/revoke` 自助吊销接口。
-- **权限隔离**：买家 key 仅可调用买家侧接口（目录查询、token 申请、事件轮询、指标上报），卖家 key 仅可调用卖家侧接口（introspect、ACK、心跳、指标上报）。
+- **权限隔离（RBAC）**：服务端按 key 绑定的 `role_scopes` 做鉴权与资源校验。默认仅 `buyer`；`seller` scope 由 seller agent 审核通过后激活。卖家接口还需校验资源归属（`owner_user_id -> seller_id -> subagent_id` 绑定关系）。
 
 ## 5.6 卖家公钥轮换协议
 - **触发**：卖家通过表单提交新公钥。
@@ -256,7 +274,7 @@ docs/templates/subagents/{subagent_id}/
 
 ## 6. 状态机与重试幂等
 
-## 6.1 请求状态机（买家视角）
+## 6.1 请求状态机（Buyer 视角）
 - `CREATED`：合约已生成
 - `SENT`：任务邮件已发出
 - `ACKED`：卖家已接收并通过基础校验
@@ -265,21 +283,63 @@ docs/templates/subagents/{subagent_id}/
 - `FAILED`：卖家失败或业务失败
 - `TIMED_OUT`：超过硬超时
 - `UNVERIFIED`：签名或 schema 验证失败
-- `DISPUTED`：人工仲裁中（见 6.4 最小争议通道）
+- `DISPUTED`：人工仲裁中（见 6.8 最小争议通道）
 
-## 6.2 幂等与去重语义
+## 6.2 请求状态机（Seller 视角）
+- `RECEIVED`：收件成功，已提取合同
+- `AUTH_CHECKING`：校验 API key/introspect/claims
+- `CONTRACT_CHECKING`：字段、版本、预算、任务类型校验
+- `QUEUED`：通过校验并入队等待 worker
+- `RUNNING`：worker 已取任务执行
+- `RESULT_PACKED`：成功结果封包完成
+- `ERROR_PACKED`：错误结果封包完成
+- `REPLIED`：同线程回信已发出
+- `DONE`：流程结束（含回放命中）
+
+## 6.3 请求状态机（Platform 视角）
+- `REQUEST_REGISTERED`：买家 request 建立
+- `TOKEN_ISSUED`：task token 已签发
+- `DELIVERY_META_ISSUED`：投递元数据已下发
+- `ACK_RECORDED`：卖家 ACK 已记录
+- `TIMEOUT_RECORDED`：买家超时已记录
+- `CLOSED`：请求闭环结束（成功/失败/超时）
+
+## 6.4 幂等与去重语义
 - 卖家侧以 `request_id` 作为唯一执行键。
 - 同 `request_id` 重复到达时：
   - 若已完成，直接回放同一结果包（不重复执行）。
   - 若执行中，返回 `EXEC_IN_PROGRESS`。
 - 幂等窗口建议不少于 24 小时。
 
-## 6.3 重试策略
+## 6.5 Seller 队列机制（MVP 建议）
+- 入队时机：通过合约与 token 校验后进入 `QUEUED`，再发送 ACK。
+- 调度策略：默认 `priority + enqueue_at(FIFO)`，并叠加 `tenant_quota` 防止单租户挤占。
+- worker 机制：`lease_ttl + heartbeat`；worker 异常时任务回退到 `QUEUED`。
+- 拒绝语义：队列压力超过阈值返回 `EXEC_QUEUE_FULL` 与 `retry_after_s`。
+- 观测项：`queue_depth`、`queue_wait_ms_p95`、`run_ms_p95`、`queue_reject_rate`。
+
+## 6.6 重试策略
 - 买家只在 `retryable=true` 或传输失败时重试。
 - 退避策略：指数退避 + 抖动，最多 3 次。
 - 超过 `hard_timeout_s` 不再重试，直接标记 `TIMED_OUT`。
 
-## 6.4 最小争议通道（MVP）
+## 6.7 Buyer 超时确认与轮询接口（MVP）
+
+- `soft_timeout_s` 到达时：Buyer Controller 默认向 Buyer Agent 发出“是否继续等待”询问（`timeout_confirmation_mode=ask_by_default`）。
+- `hard_timeout_s` 到达时：若未收到明确继续等待指令，Buyer Controller 自动将请求终态设为 `TIMED_OUT`。
+- `TIMED_OUT` 语义：结束 Buyer 本地等待与轮询，不保证也不要求远端 Seller 进程被 kill。
+
+Buyer Controller -> Buyer Agent 最小查询接口（内部接口）建议：
+- `GET /controller/requests/{request_id}`
+- 返回最小字段：`request_id`、`status`、`ack_status`、`soft_timeout_at`、`hard_timeout_at`、`last_error_code`、`updated_at`。
+- 终态返回：`final_result` 或 `final_error`（二选一）。
+
+Buyer Agent -> Buyer Controller 超时决策接口（内部接口）建议：
+- `POST /controller/requests/{request_id}/timeout-decision`
+- 请求字段最小集：`continue_wait`（布尔）、`decided_at`（ISO8601 UTC）、`note`（可选）。
+- 响应语义：返回当前 `status` 与最新 `hard_timeout_at`（若允许延长则同步返回调整后值）。
+
+## 6.8 最小争议通道（MVP）
 - **触发条件**：买家对状态为 `SUCCEEDED` 的结果提出质量异议（签名和 schema 均通过，但输出内容不符合预期）。
 - **最小流程**：
   1. 买家发送争议邮件至 `disputes@croc.tavern`，附 `request_id` 和异议描述。

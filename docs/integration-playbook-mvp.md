@@ -14,18 +14,19 @@
 1. Buyer 拉取目录，选定 `seller_id + subagent_id`。
 2. Buyer 生成 `request_id` 与任务合约。
 3. Buyer 调用 `POST /v1/tokens/task` 申请短期 token。
-4. Buyer 通过邮箱 MCP 把合约发给 Seller 邮箱。
-5. Seller 拉取任务邮件，解析合约并校验 token。
-6. Seller 通过服务端上报 ACK（已接单，可附 ETA）。
-7. Seller 执行任务，生成结果包并签名。
-8. Seller 同线程回信结果包。
-9. Buyer 轮询服务端请求事件与邮箱结果，按 `request_id` 验签+验 schema。
-10. Buyer/Seller 分别调用 `POST /v1/metrics/events` 上报最小指标。
+4. Buyer 调用 `POST /v1/requests/{request_id}/delivery-meta` 获取单次投递元数据。
+5. Buyer 通过邮箱 MCP 把合约发给 Seller 邮箱。
+6. Seller 拉取任务邮件，解析合约并校验 token。
+7. Seller 通过服务端上报 ACK（已接单，可附 ETA）。
+8. Seller 执行任务，生成结果包并签名。
+9. Seller 同线程回信结果包。
+10. Buyer 轮询服务端请求事件与邮箱结果，按 `request_id` 验签+验 schema（含错误结果包）。
+11. Buyer/Seller 分别调用 `POST /v1/metrics/events` 上报最小指标。
 
 ## 2. Buyer 端详细流程
 
 ## 2.1 启动前准备
-- 先完成 buyer 主体注册并领取 API Key。
+- 先完成用户注册（`POST /v1/users/register`）并领取 API Key（默认 `buyer` scope）。
 - 配置平台 base URL 与认证信息（仅控制面 API）。
 - 配置邮箱 MCP 能力（发送/拉取线程）。
 - 维护本地状态表（可 SQLite）：
@@ -46,15 +47,16 @@
   - TTL 建议：5 分钟
 
 ## 2.2.1 拉取能力声明模板（渐进式披露）
-- 买家确定目标 subagent 后，读取目录条目中的 `template_ref` 字段（如 `docs/templates/subagents/foxlab.text.classifier.v1/`）。
-- 拉取模板目录下的文件：
-  - `input.schema.json`：了解需要提供的输入字段
-  - `output.schema.json`：了解将获得的输出格式
-  - `example-contract.json`：参考完整合约示例
-  - `example-result.json`：预览期望的结果包格式
-  - `README.md`：阅读能力说明、标签集、约束信息
+- 买家确定目标 subagent 后，读取目录条目中的 `template_ref` 字段（语义绑定键）。
+- 调用模板下发接口：`GET /v1/catalog/subagents/{subagent_id}/template-bundle?template_ref=...`
+- 响应中读取：
+  - `input_schema`：了解需要提供的输入字段
+  - `output_schema`：了解将获得的输出格式
+  - `example_contract`：参考完整合约示例
+  - `example_result`：预览期望的结果包格式
+  - `readme_markdown`：阅读能力说明、标签集、约束信息
 - 买家 agent 可据此自动构造合约中的 `task.input` 和 `task.output_schema`。
-- MVP 阶段模板通过 Git 仓库直接读取，后续可迁移为 API 下发。
+- 可选：使用 `If-None-Match` + `ETag` 做模板缓存与增量刷新。
 
 ## 2.3 发起请求
 - 生成 `request_id`（UUIDv7）。
@@ -62,6 +64,10 @@
 - 调用 `POST /v1/tokens/task`，请求体包含：
   - `request_id`, `buyer_id`, `seller_id`, `subagent_id`, `budget_cap`, `ttl_seconds`
 - 将返回 token 放入合约 `token` 字段。
+- 调用 `POST /v1/requests/{request_id}/delivery-meta` 拉取：
+  - `delivery_address`
+  - `thread_policy`（subject 前缀/是否要求同线程回信）
+- 仅使用本次 `delivery-meta` 返回的地址发信，不从目录批量字段直接取地址。
 - 发送邮件：
   - subject：`[CROC][TASK][<request_id>] <task_type>`
   - body/attachment：`schema_type=task_contract` + JSON
@@ -83,12 +89,32 @@
   1. `request_id` 匹配
   2. `seller_id/subagent_id` 匹配
   3. 结果签名通过（使用目录下发的 `seller_public_key`）
-  4. `output` 符合 `output_schema`
+  4. `status=SUCCEEDED` 时，`output` 符合 `output_schema`
+  5. `status=FAILED/TIMED_OUT/REJECTED` 时，`error.code/message/retryable` 结构完整
 - 状态迁移：
   - v0.1 默认无进度事件，通常由 `ACKED` 直接进入终态
   - 验收通过：`SUCCEEDED`
-  - 签名或 schema 不通过：`UNVERIFIED` 或 `FAILED(RESULT_*)`
+  - 协议校验不通过：`UNVERIFIED` 或 `FAILED(RESULT_*)`
+  - 错误结果包校验通过：进入 `FAILED/TIMED_OUT/REJECTED`，并将 `error` 反馈给 Buyer Agent 作为后续决策输入
   - 超过 `hard_timeout_s`：`TIMED_OUT`
+
+## 2.5.1 超时确认策略（Buyer Controller）
+- `soft_timeout_s` 到达时默认询问 Buyer Agent 是否继续等待（`timeout_confirmation_mode=ask_by_default`）。
+- `hard_timeout_s` 到达且未收到 `continue_wait=true` 时，Buyer Controller 自动终态为 `TIMED_OUT`。
+- `TIMED_OUT` 仅表示 Buyer 侧停止等待与轮询，不代表远端 Seller 进程一定被 kill。
+
+## 2.5.2 Buyer Agent 轮询 Controller（内部接口）
+- 建议接口：`GET /controller/requests/{request_id}`（内部，不属于平台 API）。
+- 返回字段最小集：
+  - `request_id`, `status`, `ack_status`, `soft_timeout_at`, `hard_timeout_at`
+  - `last_error_code`, `updated_at`
+  - 终态时返回 `final_result` 或 `final_error`
+- 超时决策写接口：`POST /controller/requests/{request_id}/timeout-decision`
+  - 请求体：`continue_wait`（bool）, `decided_at`（ISO8601 UTC）, `note`（optional）
+  - 用途：Buyer Agent 明确告知 Controller 是否继续等待
+- 轮询策略：
+  - 活跃期（前 30 秒）每 5 秒
+  - 退避期（30 秒后）每 15 秒
 
 ## 2.6 重试规则
 - 仅在以下场景重试（最多 3 次）：
@@ -108,10 +134,21 @@
   - `result_schema_invalid`
 - 统一调用：`POST /v1/metrics/events`
 
+## 2.8 本地参数覆盖（无 `.env.example`）
+- 仓库当前不提供 `.env.example`，默认参数见 `docs/defaults-v0.1.md`。
+- 如需覆盖，建议在运行环境注入：
+  - `TIMEOUT_CONFIRMATION_MODE`
+  - `HARD_TIMEOUT_AUTO_FINALIZE`
+  - `BUYER_CONTROLLER_POLL_INTERVAL_ACTIVE_S`
+  - `BUYER_CONTROLLER_POLL_INTERVAL_BACKOFF_S`
+
 ## 3. Seller 端详细流程
 
 ## 3.1 启动前准备
-- 先完成 seller 主体注册并领取 API Key。注册时需提供 `contact_email`（工作邮箱）和 `support_email`（运维/支持邮箱，必填）。
+- 先完成用户主体注册并领取 API Key（默认 buyer 角色）。
+- 提交 seller agent 注册并审核通过后，激活 seller 角色能力（同一 `user_id` 增加 seller scope）。
+- seller 侧调用平台接口前，需通过 `API key + seller scope + 资源归属(owner_user_id->seller_id->subagent_id)` 鉴权。
+- seller agent 提交资料时需提供 `contact_email`（工作邮箱）和 `support_email`（运维/支持邮箱，必填）。
 - 配置邮箱 MCP 读取任务邮箱。
 - 配置 token 验证能力：
   - 在线 introspect（`POST /v1/tokens/introspect`，v0.1 必做）
@@ -129,11 +166,18 @@
 5. 幂等：
   - 若 `request_id` 已完成，直接回放同一结果包。
   - 若执行中，返回 `EXEC_IN_PROGRESS`。
-6. ACK：调用 `POST /v1/requests/{request_id}/ack`，写入 `accepted_at` 与可选 `estimated_finish_at`。
-7. 执行：调用具体执行器（插件函数）。
-8. 封包：写入 `status/output/error/timing/usage`。
-9. 签名：对 canonical JSON 签名写入 `signature`。
-10. 回信：同线程回复结果包。
+6. 入队：按 `priority + enqueue_at + tenant_quota` 进入 `QUEUED`。
+7. ACK：调用 `POST /v1/requests/{request_id}/ack`，写入 `accepted_at` 与可选 `estimated_finish_at/queue_position`。
+8. 执行：worker 从队列取任务，调用具体执行器（插件函数）。
+9. 封包：写入 `status/output/error/timing/usage`。
+10. 签名：对 canonical JSON 签名写入 `signature`。
+11. 回信：同线程回复结果包。
+
+## 3.2.1 Seller 队列机制（MVP 建议）
+- 入队时机：完成 token/合约校验且决定 accept 后立即入队。
+- 出队策略：同优先级 FIFO；高优先级可插队但必须受 `tenant_quota` 限制。
+- 队列拒绝：超出并发或预算阈值返回 `EXEC_QUEUE_FULL` + `retry_after_s`。
+- worker 异常恢复：使用 `lease_ttl + heartbeat`，租约过期任务回到 `QUEUED`。
 
 ## 3.3 卖家心跳建议
 - 默认间隔：`30s`
@@ -168,6 +212,7 @@
 - 模板变更通过 PR 提交，平台管理员审核合并。
 - Schema 变更须遵循合约版本策略（仅允许向后兼容新增字段）。
 - 模板更新后目录条目的 `updated_at` 同步刷新。
+- Buyer 侧模板消费统一走平台 API，不直接读取仓库目录。
 
 ## 4. 平台目录分发机制（重点）
 
@@ -203,13 +248,14 @@
   - `version`
   - `updated_at`
   - `seller_public_key`
+- 投递地址通过 `POST /v1/requests/{request_id}/delivery-meta` 单次下发，不在目录批量列表暴露。
 - 验签必须使用目录中的最新公钥；公钥轮换时需保留短暂双 key 窗口。
 
 ## 4.5 手工导入流程（当前方案）
-1. seller 完成主体注册并获取 `seller_id` 与 API Key。
-2. seller 通过表单提交 subagent 信息与能力说明。
+1. 用户完成主体注册并获取 API Key（默认 buyer）。
+2. 用户通过表单提交 seller agent（subagent）信息与能力说明（携带 `owner_user_id`）。
 3. 平台管理员基于模板维护 subagent 条目并关联 `seller_id`。
-4. 平台管理员通过 CLI 审核并导入。
+4. 平台管理员通过 CLI 审核并导入；导入成功后激活该用户的 seller 角色能力。
 5. 导入目录存储并记录 `catalog_version`。
 6. Buyer 通过查询接口获取新版本目录。
 

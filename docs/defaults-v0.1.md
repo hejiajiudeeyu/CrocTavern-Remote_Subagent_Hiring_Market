@@ -5,7 +5,7 @@
 状态说明：
 - `FROZEN`：已确认并冻结（v0.1）
 
-更新时间：2026-03-02
+更新时间：2026-03-05
 
 ## 1) 请求与超时
 
@@ -14,6 +14,10 @@
 | `ack_deadline_s` | `120` | FROZEN | 买家发单后等待 ACK 的最大时长（含邮件投递延迟） |
 | `soft_timeout_s` | `90` | FROZEN | 软超时，触发告警或降级 |
 | `hard_timeout_s` | `300` | FROZEN | 硬超时，买家终止等待并记超时 |
+| `timeout_confirmation_mode` | `ask_by_default` | FROZEN | 达到 `soft_timeout_s` 时默认先询问 Buyer Agent 是否继续等待 |
+| `hard_timeout_auto_finalize` | `true` | FROZEN | 达到 `hard_timeout_s` 且未明确继续等待时自动终态 `TIMED_OUT` |
+| `buyer_controller_poll_interval_active_s` | `5` | FROZEN | Buyer Agent 轮询 Controller 的活跃期间隔（前 30 秒） |
+| `buyer_controller_poll_interval_backoff_s` | `15` | FROZEN | Buyer Agent 轮询 Controller 的退避间隔（30 秒后） |
 | `max_retry_attempts` | `2` | FROZEN | 最大重试次数（总尝试数=3） |
 | `retry_backoff` | `exponential + jitter` | FROZEN | 重试退避策略 |
 | `email_delivery_budget_s` | `60` | FROZEN | 邮件投递预算，用于超时分层计算 |
@@ -50,6 +54,10 @@
 | `routing_fallback_policy` | `retry_once_then_switch_seller` | FROZEN | ACK 超时后路由策略 |
 | `catalog_import_mode` | `on_demand_immediate` | FROZEN | 目录按需即时导入 |
 | `seller_subagent_binding_mode` | `platform_import_association` | FROZEN | subagent 与 seller 关系由平台导入时建立 |
+| `template_delivery_mode` | `platform_api_bundle` | FROZEN | Buyer 通过平台 API 拉取模板包，不直接读取仓库目录 |
+| `catalog_expose_delivery_address` | `false` | FROZEN | 目录批量查询不返回投递地址 |
+| `delivery_meta_mode` | `request_scoped` | FROZEN | 通过 `POST /v1/requests/{request_id}/delivery-meta` 单次下发 |
+| `delivery_meta_ttl_seconds` | `900` | FROZEN | 投递元数据有效期（与 token TTL 对齐） |
 
 ## 5) 指标与展示
 
@@ -79,7 +87,8 @@
 | `request_event_scope_v0_1` | `ACKED_only` | FROZEN | v0.1 仅实现 ACK 事件，不实现进度事件 |
 | `platform_storage_backend` | `PostgreSQL` | FROZEN | 服务端主存储选型 |
 | `api_auth_mode` | `api_key` | FROZEN | 控制面 API 鉴权方式 |
-| `identity_onboarding_mode` | `pre_register_then_issue_key` | FROZEN | 买卖双方先注册，再发 API Key |
+| `identity_onboarding_mode` | `register_buyer_default_then_activate_seller_on_agent_approval` | FROZEN | 用户注册后默认 buyer；seller 角色在 agent 审核通过后激活 |
+| `seller_identity_cardinality` | `one_seller_per_user` | FROZEN | v0.1 一个 user 仅绑定一个 seller_id |
 | `catalog_submission_mode` | `form_submit_then_cli_review_import` | FROZEN | 表单收集后由 CLI 审核导入 |
 
 ## 8) 核心参数确认结果
@@ -100,6 +109,24 @@
 - `catalog_import_mode=on_demand_immediate`
 - `platform_storage_backend=PostgreSQL`
 - `seller_subagent_binding_mode=platform_import_association`
+- `catalog_expose_delivery_address=false`
+- `delivery_meta_mode=request_scoped`
+- `delivery_meta_ttl_seconds=900`
 - `api_auth_mode=api_key`
-- `identity_onboarding_mode=pre_register_then_issue_key`
+- `identity_onboarding_mode=register_buyer_default_then_activate_seller_on_agent_approval`
+- `seller_identity_cardinality=one_seller_per_user`
 - `catalog_submission_mode=form_submit_then_cli_review_import`
+
+## 9) 本地配置覆盖（无 `.env.example`）
+
+当前仓库不新增 `.env.example`，本地通过运行环境变量覆盖默认值。
+
+建议覆盖项（示例）：
+- `TIMEOUT_CONFIRMATION_MODE=ask_by_default|always_continue|always_finalize`
+- `HARD_TIMEOUT_AUTO_FINALIZE=true|false`
+- `BUYER_CONTROLLER_POLL_INTERVAL_ACTIVE_S=5`
+- `BUYER_CONTROLLER_POLL_INTERVAL_BACKOFF_S=15`
+
+说明：
+- 未设置时，行为以本文件冻结默认值为准。
+- 若实现侧采用配置文件（如 YAML/TOML），需保持与上述变量语义一致。
