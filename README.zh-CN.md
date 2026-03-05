@@ -9,8 +9,8 @@
 ---
 
 **在线演示**：
-- [Ecosystem 介绍](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/ecosystem.html)
-- [Playground 演示](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/playground.html)
+- [Ecosystem 介绍](https://hejiajiudeeyu.github.io/CrocTavern-Remote_Subagent_Hiring_Market/site/ecosystem.html)
+- [Playground 演示](https://hejiajiudeeyu.github.io/CrocTavern-Remote_Subagent_Hiring_Market/site/playground.html)
 
 **社区与贡献**：
 - [Contributing Guide](CONTRIBUTING.md)

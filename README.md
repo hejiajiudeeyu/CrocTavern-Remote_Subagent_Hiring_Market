@@ -10,8 +10,8 @@ English | [中文](README.zh-CN.md)
 
 ## Live Demo
 
-- [Ecosystem Page](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/ecosystem.html)
-- [Playground Demo](https://hejiajiudeeyu.github.io/CrocTavern-Subagent_Hiring_Market/playground.html)
+- [Ecosystem Page](https://hejiajiudeeyu.github.io/CrocTavern-Remote_Subagent_Hiring_Market/site/ecosystem.html)
+- [Playground Demo](https://hejiajiudeeyu.github.io/CrocTavern-Remote_Subagent_Hiring_Market/site/playground.html)
 
 ## Community
 
