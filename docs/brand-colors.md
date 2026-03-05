@@ -35,14 +35,33 @@ linear-gradient(135deg, #5C7A29, #3A5118)
 | 浅色边框 | `--croc-200` | `#C9D9B1` | 高亮边框、分隔线 |
 | 基础边框 | `--line` | `#D4DFC6` | 卡片/面板边框 |
 
-## 3. 辅助色（不随主题变化）
+## 3. 角色色（方案 G：靛蓝 + 酒红 + Croc Green）
 
-| 角色/语义 | HEX | 说明 |
-|---|---|---|
-| Buyer | `#3B82F6` (蓝) / `#0f766e` (青) | 买家标识 |
-| Seller | `#2563eb` (蓝) | 卖家标识 |
-| Platform | `#4A6521` (croc-600) | 平台标识（与品牌色同系） |
-| OK / Success | `#15803d` / `#10B981` | 成功状态 |
+三方角色色完全独立，互不撞色。
+
+| 角色 | 主色 HEX | 浅底 HEX | CSS 变量 | 用途 |
+|---|---|---|---|---|
+| **Buyer（买家）** | `#4F46B0` 靛蓝 | `#EEEDF7` | `--buyer` / `--buyer-light` | 标题、图标、步骤数字、大色块背景、泳道标签 |
+| **Seller（卖家）** | `#8B2E45` 酒红 | `#F5ECF0` | `--seller` / `--seller-light` | 标题、图标、步骤数字、大色块背景、泳道标签 |
+| **Platform（平台）** | `#5C7A29` Croc Green | — | `--croc-500` | 专属，不与买卖双方共用 |
+
+### 用法规则
+
+**深色大色块模式（买家/卖家双栏）**：
+- 买家卡片整体背景 `--buyer`（靛蓝），卖家卡片整体背景 `--seller`（酒红）
+- 卡片内标题、步骤标题：`#FFFFFF`
+- 卡片内正文、副标题：`rgba(255,255,255,0.85)`
+- 卡片内弱化文字（tagline、底部说明）：`rgba(255,255,255,0.8)`
+- 步骤数字圆圈：`rgba(255,255,255,0.2)` 背景 + `#FFFFFF` 文字
+- 受众标签（persona-tag）：`rgba(255,255,255,0.15)` 背景 + `#FFFFFF` 文字
+- 分割线：`rgba(255,255,255,0.2)`
+- 技术版代码高亮：`rgba(255,255,255,0.15)` 背景 + `#FFFFFF` 文字
+- 技术版图标：`rgba(255,255,255,0.5)`
+
+**浅色模式（场景流程图 flow-side 等）**：
+- 买家侧浅底 `--buyer-light`（`#EEF2FF`）+ 标签用 `--buyer` 色文字
+- 卖家侧浅底 `--seller-light`（`#FFF1F2`）+ 标签用 `--seller` 色文字
+- Platform 相关元素（生态三角 platform 节点、四大支柱图标等）统一使用 Croc Green
 
 ## 4. 背景色
 
@@ -73,8 +92,8 @@ linear-gradient(135deg, #5C7A29, #3A5118)
   --line: #D4DFC6;
   --brand: #5C7A29;
   --brand-deep: #3A5118;
-  --buyer: #0f766e;
-  --seller: #2563eb;
+  --buyer: #4F46B0;
+  --seller: #8B2E45;
   --platform: #4A6521;
   --ok: #15803d;
 }
@@ -93,5 +112,9 @@ linear-gradient(135deg, #5C7A29, #3A5118)
   --croc-500: #5C7A29;
   --croc-600: #4A6521;
   --croc-700: #3A5118;
+  --buyer: #4F46B0;
+  --buyer-light: #EEEDF7;
+  --seller: #8B2E45;
+  --seller-light: #F5ECF0;
 }
 ```
